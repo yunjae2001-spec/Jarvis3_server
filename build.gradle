@@ -1,0 +1,44 @@
+plugins {
+    id 'java'
+    id 'org.springframework.boot' version '4.0.2'
+    id 'io.spring.dependency-management' version '1.1.7'
+}
+
+group = 'com.yunjae'
+version = '0.0.1-SNAPSHOT'
+description = 'Jarvis3_server'
+
+java {
+    toolchain {
+        languageVersion = JavaLanguageVersion.of(21)
+    }
+}
+
+configurations {
+    compileOnly {
+        extendsFrom annotationProcessor
+    }
+}
+
+repositories {
+    mavenCentral()
+}
+
+dependencies {
+    // 1. 웹 종합 세트
+    implementation 'org.springframework.boot:spring-boot-starter-web'
+
+    // 2. [핵심] 가장 검증된 순정 Dotenv 부품 (버전 3.0.0)
+    implementation 'io.github.cdimascio:dotenv-java:3.0.0'
+
+    // 3. 편의 도구
+    compileOnly 'org.projectlombok:lombok'
+    annotationProcessor 'org.projectlombok:lombok'
+
+    // 4. 테스트 도구
+    testImplementation 'org.springframework.boot:spring-boot-starter-test'
+}
+
+tasks.named('test') {
+    useJUnitPlatform()
+}
