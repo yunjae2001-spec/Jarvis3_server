@@ -1,13 +1,17 @@
+version: '3.8'
 services:
   postgres:
-    image: postgres:16-alpine
+    # 핵심 변경: 일반 alpine 이미지 대신 벡터 연산이 가능한 pgvector 이미지 사용
+    image: pgvector/pgvector:pg16
     container_name: jarvis_postgres
     ports:
-      - "5432:5432"  # (외부포트:내부포트) 문 뚫기
+      - "5432:5432"
     environment:
       POSTGRES_DB: jarvis_db
-      POSTGRES_USER: ${DB_USERNAME:-jarvis_user}      # .env에서 가져옴 (없으면 기본값)
-      POSTGRES_PASSWORD: ${DB_PASSWORD:-1234}         # .env에서 가져옴 (없으면 기본값)
+      # .env 설정을 따르되, 없으면 기본값 사용 (기존 설정 유지)
+      POSTGRES_USER: ${DB_USERNAME:-jarvis_user}
+      POSTGRES_PASSWORD: ${DB_PASSWORD:-1234}
     volumes:
-      - ./postgres_data:/var/lib/postgresql/data      # 방이 폭파돼도 데이터는 내 컴퓨터에 저장
+      # 데이터 영구 저장을 위한 로컬 폴더 매핑
+      - ./postgres_data:/var/lib/postgresql/data
     restart: always

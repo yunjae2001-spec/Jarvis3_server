@@ -2,6 +2,7 @@ package com.yunjae.jarvis3_server.controller;
 
 import com.yunjae.jarvis3_server.service.OmDbService;
 import com.yunjae.jarvis3_server.service.PrivateChamberService;
+import com.yunjae.jarvis3_server.service.GeminiService;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpStatus;
@@ -18,6 +19,7 @@ public class PrivateChamberController {
 
     private final PrivateChamberService authService;
     private final OmDbService omDbService;
+    private final GeminiService geminiService;
 
     /**
      * [입법자 모드 진입]
@@ -68,6 +70,15 @@ public class PrivateChamberController {
             return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(e.getMessage());
         }
     }
+
+    // PrivateChamberController.java 내부로 이동 예시
+    @GetMapping("/admin/check-models")
+    public String checkModels() {
+        // PIN 인증 로직(PrivateChamberService)을 거친 후에만 실행되도록 보호
+        geminiService.listAvailableModels();
+        return "Admin: Model list has been output to the console.";
+    }
+
     /**
      * [입법자 모드 종료]
      * 명시적으로 세션을 종료하거나 입법 모드를 닫습니다.

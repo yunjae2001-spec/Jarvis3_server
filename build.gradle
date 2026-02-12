@@ -22,6 +22,7 @@ configurations {
 
 repositories {
     mavenCentral()
+    maven { url 'https://oss.sonatype.org/content/repositories/snapshots' } // 최신 스냅샷 저장소 추가
 }
 
 dependencies {
@@ -37,10 +38,16 @@ dependencies {
 
     // 4. JPA (자바 객체와 DB 테이블을 연결해주는 번역기)
     implementation 'org.springframework.boot:spring-boot-starter-data-jpa'
-    // 2. PostgreSQL Driver (DB와 대화하기 위한 전용 언어팩)
+    // 5. PostgreSQL Driver (DB와 대화하기 위한 전용 언어팩)
     runtimeOnly 'org.postgresql:postgresql'
 
-    // 4. 테스트 도구
+    // 6. Hibernate Types (Vector 타입 매핑을 위한 필수 유틸)
+    implementation 'io.hypersistence:hypersistence-utils-hibernate-70:3.+'
+
+    // 7. JSON 처리를 위한 Jackson (이미 있다면 생략 가능)
+    implementation 'com.fasterxml.jackson.core:jackson-databind'
+
+    // 8. 테스트 도구
     testImplementation 'org.springframework.boot:spring-boot-starter-test'
 }
 
