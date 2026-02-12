@@ -1,3 +1,4 @@
+```mermaid
 gitGraph
    commit
    commit
