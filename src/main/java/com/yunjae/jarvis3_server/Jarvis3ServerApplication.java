@@ -1,10 +1,12 @@
 package com.yunjae.jarvis3_server;
 
-import io.github.cdimascio.dotenv.Dotenv; // 순정 라이브러리 임포트
+import io.github.cdimascio.dotenv.Dotenv;
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
+import org.springframework.scheduling.annotation.EnableScheduling; // [추가] 스케줄링 기능을 위한 임포트
 
 @SpringBootApplication
+@EnableScheduling // [핵심 추가] 이 어노테이션이 있어야 @Scheduled 로직이 작동합니다.
 public class Jarvis3ServerApplication {
 
     public static void main(String[] args) {

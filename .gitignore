@@ -43,3 +43,5 @@ test.http
 # Security - 설정 파일 보호
 src/main/resources/application.properties
 .env
+
+postgres_data/

@@ -3,11 +3,14 @@ package com.yunjae.jarvis3_server.domain;
 import jakarta.persistence.*;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
+import lombok.Setter;
 import org.hibernate.annotations.ColumnTransformer;
+import java.time.LocalDateTime; // [추가] 시간 기록용
 
 @Entity
 @Table(name = "vector_nodes")
 @Getter
+@Setter
 @NoArgsConstructor
 @NamedNativeQuery(
         name = "VectorNode.findNearestNeighbors",
@@ -26,9 +29,8 @@ import org.hibernate.annotations.ColumnTransformer;
             
         FROM vector_nodes v
         INNER JOIN raw_archives a ON v.archive_id = a.id
-        
-        /* [지능형 가중치 반영] 유사도 점수를 시냅스 강도로 나누어 우선순위 조정 */
-        ORDER BY (v.embedding <=> CAST(:embedding AS vector)) / v.synapse_strength ASC
+        WHERE v.synapse_strength > 0 
+        ORDER BY (v.embedding <=> CAST(:embedding AS vector)) / LN(v.synapse_strength + 1.0) ASC
         LIMIT :limit
     """
 )
@@ -41,7 +43,7 @@ import org.hibernate.annotations.ColumnTransformer;
                                 @FieldResult(name = "id", column = "v_id"),
                                 @FieldResult(name = "embedding", column = "v_embedding"),
                                 @FieldResult(name = "synapseStrength", column = "v_synapse_strength"),
-                                @FieldResult(name = "archive", column = "v_archive_id") // 관계 무결성 유지
+                                @FieldResult(name = "archive", column = "v_archive_id")
                         }
                 ),
                 @EntityResult(
@@ -75,20 +77,31 @@ public class VectorNode {
     @Column(name = "synapse_strength")
     private Double synapseStrength;
 
-    /* 기존 생성자 유지: 데이터 주입 시 충돌 방지 */
+    // [추가] 마지막 활성화 시간: 스케줄러가 이 시간을 기준으로 망각을 결정합니다.
+    @Column(name = "last_activated_at")
+    private LocalDateTime lastActivatedAt = LocalDateTime.now();
+
     public VectorNode(RawArchive archive, String embedding) {
         this.archive = archive;
         this.embedding = embedding;
-        this.synapseStrength = 1.0; // 기본 가중치 초기화
+        this.synapseStrength = 1.0;
+        this.lastActivatedAt = LocalDateTime.now(); // 생성 시점 초기화
     }
 
-    /* [신규] 시냅스 강화/약화 로직 */
+    /**
+     * [추가] 시냅스 활성화: LIKE/Recall 발생 시 호출하여 망각 대상에서 제외시킵니다.
+     */
+    public void activateSynapse() {
+        this.lastActivatedAt = LocalDateTime.now();
+    }
+
     public void updateSynapse(boolean isPositive) {
-        double learningRate = 0.1; // 조정 폭은 수석님의 피드백 감도에 따라 조절 가능
+        double learningRate = 0.1;
         if (isPositive) {
             this.synapseStrength += learningRate;
         } else {
-            this.synapseStrength = Math.max(0.1, this.synapseStrength - learningRate); // 최소값 방어선
+            this.synapseStrength = Math.max(0.1, this.synapseStrength - learningRate);
         }
+        this.activateSynapse(); // 가중치 변경도 일종의 '자극'이므로 시간 갱신
     }
 }
