@@ -1,4 +1,3 @@
-version: '3.8'
 services:
   postgres:
     # 핵심 변경: 일반 alpine 이미지 대신 벡터 연산이 가능한 pgvector 이미지 사용
